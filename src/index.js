@@ -4,7 +4,22 @@ import Zdog, { TAU } from 'zdog';
       rotate: { y: TAU/2 } // /2 = half turn
       rotate: { y: TAU*3 } // *3 = 3 full turns */
 
+const ctx = document.querySelector("canvas").getContext("2d");
 let isSpinning = true;
+
+function resizeCanvasToDisplaySize(canvas) {
+  // look up the size the canvas is being displayed
+  const width = canvas.clientWidth;
+  const height = canvas.clientHeight;
+
+  // If it's resolution does not match change it
+  if (canvas.width !== width || canvas.height !== height) {
+    canvas.width = width;
+    canvas.height = height;
+    return true;
+  }
+  return false;
+}
 
 let illo = new Zdog.Illustration({
   element: '.zdog-canvas',
@@ -144,6 +159,7 @@ smiley.copy({
   function animate() {
     if (isSpinning) illo.rotate.y -= 0.02;
     illo.updateRenderGraph();
+    resizeCanvasToDisplaySize(ctx.canvas);
     // animate next frame
     requestAnimationFrame( animate );
   }
