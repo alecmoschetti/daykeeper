@@ -320,6 +320,8 @@ fieldset {
 
 canvas {
   display: block;
+  width: 115px;
+  height: 115px;
   border-radius: 50%;
   background-color: var(--light-access);
   cursor: move;
@@ -444,11 +446,6 @@ canvas {
     header {
         flex-flow: row nowrap;
         align-items: center;
-    }
-
-    canvas {
-        width: 150px;
-        height: 150px;
     }
 
     body {
