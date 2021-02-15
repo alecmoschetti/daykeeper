@@ -266,6 +266,7 @@ fieldset  {
 }
 
 li,
+.input-item,
 .edit-item,
 #categories,
 .task-containers,
@@ -277,6 +278,7 @@ fieldset {
 
 header,
 .images-container,
+.input-item,
 .edit-item,
 .task,
 .task-item   {
@@ -295,7 +297,8 @@ footer,
 }
 
 .edit-form-container,
-.input-item {
+.input-item input,
+.input-item select {
     flex-grow: 2;
 }
 
@@ -341,6 +344,10 @@ fieldset {
     width: 50%;
 }
 
+.input-item:not(.no-due-date-container) {
+    width: 100%;
+}
+
 .button-container > button,
 #sortby-select,
 #addTaskButton,
@@ -374,6 +381,16 @@ fieldset {
 
 .priority {
     border-radius: 5px;
+}
+
+label {
+    margin-right: 1rem;
+}
+
+input[type='checkbox'] {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-left: auto;
 }
 
 /* footer rules */
@@ -508,10 +525,6 @@ fieldset {
 
     .button-container {
         width: 30%;
-    }
-
-    .info {
-        width: 30rem;
     }
 
     .controlsvg-containers {
