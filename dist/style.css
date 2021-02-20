@@ -136,7 +136,7 @@ nav,
 main,
 footer,
 .edit-item,
-#categories,
+#navList,
 .task-item,
 .folder-container > *,
 form,
@@ -144,7 +144,7 @@ fieldset {
     width: 100%;
 }
 
-#categories,
+#navList,
 form,
 fieldset {
     height: 100%;
@@ -226,6 +226,10 @@ li:hover:nth-child(even):not(.nav-title):not(.folder-container) {
     display: none;
 }
 
+svg.icon {
+    pointer-events: none;
+  }
+
 /* grid rules */
 
 body,
@@ -256,7 +260,7 @@ li {
 
 header,
 #folder-title,
-#categories,
+#navList,
 .input-container,
 .task-list,
 .folder-container,
@@ -268,7 +272,7 @@ fieldset  {
 li,
 .input-item,
 .edit-item,
-#categories,
+#navList,
 .task-containers,
 .task-item,
 footer,
@@ -286,13 +290,13 @@ header,
 }
 
 .site-title,
-#categories,
+#navList,
 footer {
     justify-content: center;
 }
 
 footer,
-#categories {
+#navList {
     align-content: center;
 }
 
@@ -307,7 +311,7 @@ footer,
 }
 
 #controls {
-    justify-content: flex-end;
+    justify-content: center;
 }
 
 .task-containers {
@@ -344,12 +348,16 @@ fieldset {
     width: 50%;
 }
 
-.input-item:not(.no-due-date-container) {
+.input-item {
     width: 100%;
 }
 
+#sortby-select {
+    width: 15rem;
+    height: 2rem;
+}
+
 .button-container > button,
-#sortby-select,
 #addTaskButton,
 .title-heading {
     margin-right: 1rem;
@@ -368,7 +376,6 @@ fieldset {
     box-shadow: 0px 15px 25px -4px rgba(30,30,60,0.25);
 }
 
-#folder-title div,
 .input-item {
     margin: .5rem 0;
 }
@@ -385,12 +392,6 @@ fieldset {
 
 label {
     margin-right: 1rem;
-}
-
-input[type='checkbox'] {
-    width: 1.5rem;
-    height: 1.5rem;
-    margin-left: auto;
 }
 
 /* footer rules */
@@ -424,8 +425,8 @@ input[type='checkbox'] {
 }
 
 .controlsvg-containers {
-    width: 2rem;
-    height: 2rem;
+    width: 3rem;
+    height: 3rem;
 }
 
 /* modal rules here */
@@ -483,7 +484,6 @@ input[type='checkbox'] {
 
     body {
         grid-template-columns: 25% 75%;
-        /* grid-template-rows: repeat(4, 1fr); */
         grid-template-areas: 
             "header header"
             "nav main"
@@ -509,6 +509,7 @@ input[type='checkbox'] {
 
     footer {
         grid-area: footer;
+        margin-top: 1rem;
     }
 
     header,
@@ -518,17 +519,16 @@ input[type='checkbox'] {
         border-radius: 8px;
     }
 
-    #categories {
+    #navList {
         justify-content: flex-start;
         align-items: flex-start;
     }
 
-    .button-container {
-        width: 30%;
+    #folder-title {
+        justify-content: center;
     }
 
-    .controlsvg-containers {
-        width: 3rem;
-        height: 3rem;
+    .button-container {
+        width: 30%;
     }
 }

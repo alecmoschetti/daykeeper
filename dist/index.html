@@ -36,7 +36,7 @@
     </header>
 
     <nav class="hidden">
-      <ul id="categories" class="flex">
+      <ul id="navList" class="flex">
         <li class="nav-title">
           <div class="navicon-container">
             <svg
@@ -61,31 +61,6 @@
           <div class="navicon-container">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              class="icon icon-tabler icon-tabler-circle-dashed"
-              viewBox="0 0 24 24"
-              stroke-width="1.5"
-              stroke="#000000"
-              fill="none"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M8.56 3.69a9 9 0 0 0 -2.92 1.95" />
-              <path d="M3.69 8.56a9 9 0 0 0 -.69 3.44" />
-              <path d="M3.69 15.44a9 9 0 0 0 1.95 2.92" />
-              <path d="M8.56 20.31a9 9 0 0 0 3.44 .69" />
-              <path d="M15.44 20.31a9 9 0 0 0 2.92 -1.95" />
-              <path d="M20.31 15.44a9 9 0 0 0 .69 -3.44" />
-              <path d="M20.31 8.56a9 9 0 0 0 -1.95 -2.92" />
-              <path d="M15.44 3.69a9 9 0 0 0 -3.44 -.69" />
-            </svg>
-          </div>
-          <h3><a class="selected">General</a></h3>
-        </li>
-        <li>
-          <div class="navicon-container">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
               class="icon icon-tabler icon-tabler-pencil"
               viewBox="0 0 24 24"
               stroke-width="1.5"
@@ -99,7 +74,7 @@
               <line x1="13.5" y1="6.5" x2="17.5" y2="10.5" />
             </svg>
           </div>
-          <h3><a>Today</a></h3>
+          <h3><a class="live">Today</a></h3>
         </li>
         <li>
           <div class="navicon-container">
@@ -122,7 +97,16 @@
               <line x1="12" y1="14" x2="12" y2="18" />
             </svg>
           </div>
-          <h3><a>This week</a></h3>
+          <h3><a class="live">This week</a></h3>
+        </li>
+        <li>
+          <div class="navicon-container">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-infinity" viewBox="0 0 24 24" stroke-width="1.5" stroke="#000000" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+              <path d="M9.828 9.172a4 4 0 1 0 0 5.656a10 10 0 0 0 2.172 -2.828a10 10 0 0 1 2.172 -2.828a4 4 0 1 1 0 5.656a10 10 0 0 1 -2.172 -2.828a10 10 0 0 0 -2.172 -2.828" />
+            </svg>
+          </div>
+          <h3><a class="live">All</a></h3>
         </li>
         <li class="nav-title">
           <div class="navicon-container">
@@ -167,7 +151,32 @@
           </div>
           <h3><a>Add Project</a></h3>
         </li>
-        <li class="nav-title">
+        <li>
+          <div class="navicon-container">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              class="icon icon-tabler icon-tabler-circle-dashed"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="#000000"
+              fill="none"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M8.56 3.69a9 9 0 0 0 -2.92 1.95" />
+              <path d="M3.69 8.56a9 9 0 0 0 -.69 3.44" />
+              <path d="M3.69 15.44a9 9 0 0 0 1.95 2.92" />
+              <path d="M8.56 20.31a9 9 0 0 0 3.44 .69" />
+              <path d="M15.44 20.31a9 9 0 0 0 2.92 -1.95" />
+              <path d="M20.31 15.44a9 9 0 0 0 .69 -3.44" />
+              <path d="M20.31 8.56a9 9 0 0 0 -1.95 -2.92" />
+              <path d="M15.44 3.69a9 9 0 0 0 -3.44 -.69" />
+            </svg>
+          </div>
+          <h3><a class="selected live">General</a></h3>
+        </li>
+        <li class="nav-title" id="completed">
           <div class="navicon-container">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -204,7 +213,7 @@
               <polyline points="12 7 12 12 15 15" />
             </svg>
           </div>
-          <h3><a>By time</a></h3>
+          <h3><a class="live">By time</a></h3>
         </li>
         <li>
           <div class="navicon-container">
@@ -225,7 +234,7 @@
               />
             </svg>
           </div>
-          <h3><a>By project</a></h3>
+          <h3><a class="live">By project</a></h3>
         </li>
       </ul>
     </nav>
@@ -233,16 +242,9 @@
     <main>
       <!-- to be generated with javascript -->
       <!-- this is just example for me to design with -->
-      <div id="general" class="board-container">
-        <div id="folder-title" class="task-containers flex">
-          <h2 class="title-heading">General</h2>
-          <div id="controls" class="flex">
-              <select name="sortby" id="sortby-select">
-                <option value="">Sort tasks by</option>
-                <option value="priority">Priority</option>
-                <option value="status">Status</option>
-                <option value="low">Completion date</option>
-              </select>
+      <div class="board-container">
+
+          <div id="controls" class="task-containers flex">
             <button class="controlsvg-containers" id="addTaskButton">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -279,41 +281,53 @@
               </svg>
             </button>
           </div>
-        </div>
 
-        <div class="task-containers">
-          <div class="flex input-container">
+        <div class="task-containers hidden" id="addFormContainer">
+          <form class="flex input-container" id="new-form">
             <div class="input-item flex" data-task="title">
-              <label class="info" for="new-title">Title:</label>
-              <input class="info" id="new-title" />
+              <label class="info" for="title">Title:</label>
+              <input type="text" class="info" id="new-title" data-new="title" name="title" requred>
             </div>
             <div class="input-item flex">
               <label class="info" for="priority-select">Priority:</label>
-              <select class="info" name="priority" id="priority-select">
+              <select class="info" name="priority" id="priority-select" data-new="priority">
                 <option value="">Please select task priority</option>
                 <option value="high">High</option>
-                <option value="med">Med</option>
+                <option value="med" selected>Med</option>
                 <option value="low">Low</option>
               </select>
             </div>
-            <div class="input-item flex">
-              <label class="info" for="due-date-picker">Due date:</label>
-              <input class="info" type="date" id="due-date-picker" name="due-date">
+            <div class="input-item flex" data-task="notes">
+              <label class="info" for="notes">Notes:</label>
+              <input type="textfield" class="info" id="new-notes" data-new="notes" name="notes">
             </div>
-            <div class="input-item flex no-due-date-container">
-              <label class="info" for="no-due-date">No due date needed:</label>
-              <input type="checkbox" id="no-due-date" name="no-due-date">
+            <div class="input-item flex" id="projectSelection">
+              <label class="info" for="project">Project:</label>
+              <select class="info" name="project">
+                <option value="">Please select project folder for task</option>
+                <option value="general" selected>General</option>
+              </select>
             </div>
-          </div>
+          </form>
           <div class="flex button-container">
             <button id="submit" class="input-item">Add</button>
             <button id="cancel" class="input-item">Cancel</button>
           </div>
         </div>
 
-        <section class="task-containers">
+        <div id="folder-title" class="task-containers flex">
+          <h2 class="title-heading" data-heading="general">General</h2>
+          <select name="sortby" id="sortby-select">
+            <option value="">Sort tasks by</option>
+            <option value="alphabetical">Alphabetical</option>
+            <option value="priority">Priority</option>
+            <option value="recent">Recently added</option>
+          </select>
+        </div>
+
+        <section class="task-containers" id="task-board">
           <ul class="task-list flex">
-            <li class="task-item flex">
+<!--             <li class="task-item flex">
               <div class="taskicon-container task">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -1112,10 +1126,12 @@
                     </div>
                   </li>          
               </ul>
-            </li>
+            </li> -->
           </ul>
         </section>
+
       </div>
+
     </main>
 
     <footer class="flex">
@@ -1156,10 +1172,6 @@
                         <div class="edit-item flex">
                           <label for="due-date-picker-edit">Change due date:</label>
                           <input type="date" id="due-date-picker-edit" name="due-date-picker-edit">
-                        </div>
-                        <div class="edit-item flex">
-                            <label for="no-due-date-edit">No due date needed:</label>
-                            <input type="checkbox" name="no-due-date-edit" id="no-due-date-edit">
                         </div>
                         <div class="edit-item flex">
                           <label for="priority-edit">Priority</label>
