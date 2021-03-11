@@ -1,19 +1,16 @@
-      
-      let general = CreateProject({ //our default folder project for our projects array
-        title: 'general',
-      });
-      let projects = [general]; //project folders array
-      let completed = []; //
+
+      import {setCompleted, setDeletionOfTask, setDeletionOfProject} from './storage'
+
+      let projects = {}; 
+      let completed = []; 
       let all = [];
 
       //project factory function
       function CreateProject(obj) {
         let {title} = obj;
-        let status = false;
         let tasks = [];
         return {
           title, 
-          status, 
           tasks
         };
       };
@@ -29,10 +26,9 @@
           project,
           status,
           dateCreated,
-          complete: function(arr, proj, task) {
+          complete: function(obj, proj, task) {
             this.status = true;
-            completeTask(arr, proj, task)
-
+            completeTask(obj, proj, task);
           }
         };
       }
@@ -46,69 +42,68 @@
         return str;
     }
 
-    function getProjectIndex(arr, name) {
-      let projectIndex = arr.findIndex(project => project.title === name);
-      return projectIndex;
+    function getTaskIndex(proj, task) {
+        let project = getProject(proj);
+        let taskIndex = project.tasks.findIndex(obj => obj.title === task);
+        return taskIndex;
     }
 
-    function getTaskIndex(arr, proj, task) {
-      let project = getProject(arr, proj);
-      let taskIndex = project.tasks.findIndex(obj => obj.title === task);
-      return taskIndex;
-    }
-
-    function getProject(arr, name) {
-      let projectIndex = getProjectIndex(arr, name);
-      let getProject = arr[projectIndex];
-      return getProject;
+    function getProject(name) {
+      let project = projects[name];
+      return project;
   }
 
-  function getTask(arr, proj, task) {
-      let project = getProject(arr, proj)
-      let taskIndex = getTaskIndex(arr, proj, task);
-      let todo = project.tasks[taskIndex];
-      return todo;
+  function getTask(proj, task) {
+      let project = getProject(proj)
+      if (!project) {
+        //maybe?
+      } else {
+        let taskIndex = getTaskIndex(proj, task);
+        let todo = project.tasks[taskIndex];
+        return todo;
+      }
 }
 
-      function removeTask(arr, proj, task) {
-        if (arr === all || arr === completed) {
+      function removeTask(obj, proj, task) {
+        if (obj === all || obj === completed) { //objects are our global arrays of task objects
           let taskNoSpaces = deleteSpacesInStrings(task);
-          let taskIndex = arr.findIndex(todo => todo.title === taskNoSpaces);
-          let removed = arr.splice(taskIndex, 1);
+          let taskIndex = obj.findIndex(todo => todo.title === taskNoSpaces); //objects are actually arrays which is why array methods are working here
+          let removed = obj.splice(taskIndex, 1);
           return removed;
-        } else {
-          let taskIndex = getTaskIndex(arr, proj, task);
-          let projectIndex = getProjectIndex(arr, proj);
-          let removed = arr[projectIndex].tasks.splice(taskIndex, 1);
+        } else { //obj is equal to our global projects object
+          let taskIndex = getTaskIndex(proj, task);
+          let removed = obj[proj].tasks.splice(taskIndex, 1);
           return removed;
         }
       }
 
-      function removeProject(arr, proj) {
-        let projectIndex = getProjectIndex(arr, proj);
-        let removed = arr.splice(projectIndex, 1);
-        return removed;
+      function removeProject(proj, name) {
+        delete projects[proj];
+        setDeletionOfProject(name);
       }
 
-      function completeTask(arr, proj, task) {
-        let completedTask = removeTask(arr, proj, task);
-        completed.push(completedTask);
+      function completeTask(obj, proj, task) {
+        let completedTask = removeTask(obj, proj, task); //return the removed task object into a variable
+        completedTask.status = true;
+        completed.push(completedTask); //push that object into our global completed array
+        setCompleted(completedTask);
+        setDeletionOfTask(proj, task);
       }
 
-      function sortingLogic(arr, proj, method) {
-        if (arr === all) {
+      function sortingLogic(obj, proj, method) {
+        if (obj === all) {
           if (method === 'alphabetical') {
-            let sortedArr = arr.sort((a, b) => a.title.localeCompare(b.title));
+            let sortedArr = obj.sort((a, b) => a.title.localeCompare(b.title));
             return sortedArr;
           } else if (method === 'priority') {
-            let sortedArr = arr.sort((a, b) => a.priority.localeCompare(b.priority));
+            let sortedArr = obj.sort((a, b) => a.priority.localeCompare(b.priority));
             return sortedArr;
           } else if (method === 'recent') {
-              let sortedArr = arr.sort((a, b) => a.dateCreated - b.dateCreated);
+              let sortedArr = obj.sort((a, b) => a.dateCreated - b.dateCreated);
               return sortedArr;
           }
-        } else if (arr === completed) {
-          let flattened = arr.flat(1);
+        } else if (obj === completed) {
+          let flattened = obj.flat(1);
           if (method === 'alphabetical') {
             let sortedArr = flattened.sort((a, b) => a.title.localeCompare(b.title));
             return sortedArr;
@@ -121,44 +116,30 @@
           }
         } else {
             if (method === 'alphabetical') {
-              let projectIndex = arr.findIndex(project => project.title === proj);
-              let sortedArr = arr[projectIndex].tasks.sort((a, b) => a.title.localeCompare(b.title));
+              let sortedArr = obj[proj].tasks.sort((a, b) => a.title.localeCompare(b.title));
               return sortedArr;
             } else if (method === 'priority') {
-              let projectIndex = arr.findIndex(project => project.title === proj);
-              let sortedArr = arr[projectIndex].tasks.sort((a, b) => a.priority.localeCompare(b.priority));
+              let sortedArr = obj[proj].tasks.sort((a, b) => a.priority.localeCompare(b.priority));
               return sortedArr;
             } else if (method === 'recent') {
-                let projectIndex = arr.findIndex(project => project.title === proj);
-                let sortedArr = arr[projectIndex].tasks.sort((a, b) => a.dateCreated - b.dateCreated)
+                let sortedArr = obj[proj].tasks.sort((a, b) => a.dateCreated - b.dateCreated)
                 return sortedArr;
             }
         }
       }
 
-      function sortTasks(arr, proj, choice) {
+      function sortTasks(obj, proj, choice) {
         switch(true) {
           case (choice === 'alphabetical'): 
-            let sortedAlpha = sortingLogic(arr, proj, choice);
+            let sortedAlpha = sortingLogic(obj, proj, choice);
             return sortedAlpha;
           case (choice === 'priority'): 
-            let sortedPriority = sortingLogic(arr, proj, choice);
+            let sortedPriority = sortingLogic(obj, proj, choice);
             return sortedPriority;
           case (choice === 'recent'): 
-            let sortedRecent = sortingLogic(arr, proj, choice);
+            let sortedRecent = sortingLogic(obj, proj, choice);
             return sortedRecent;
         }
       }
 
-      export {
-        CreateProject, 
-        CreateTask, 
-        getProject, 
-        getTask, 
-        removeTask, 
-        removeProject, 
-        deleteSpacesInStrings, 
-        sortTasks,
-        projects, 
-        completed, 
-        all };
+      export { CreateProject, CreateTask, getProject, getTask, removeTask, removeProject, deleteSpacesInStrings, sortTasks, completeTask, projects, completed, all };

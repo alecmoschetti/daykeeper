@@ -1,50 +1,36 @@
 import { animate } from './zdog';
-import {setStorage, getStorage} from './storage';
-import {
-    CreateProject, 
-    CreateTask, 
-    getProject, 
-    getTask, 
-    removeTask, 
-    removeProject, 
-    deleteSpacesInStrings, 
-    sortTasks,
-    projects, 
-    completed, 
-    all
-} from './tasks';
+import {setNavValues, setProjectsList, setProjectTask, setAll, setDeletionOfTask, setDeletionOfCompletedTask, setRemovalOfNavValue} from './storage';
+import {ro, taskListUL, toggleNav, toggleHiddenControls, printProjectTasks, printTasks, deleteTaskFromDom, newNavSelection, getHeading, setHeading, goToAll, appendLI} from './helpers';
+import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask, removeProject, sortTasks, projects, completed, all} from './tasks';
 
   /* DOM manipulation scripts */
 
   //global variables
-    const body = document.querySelector('body'); 
-    const nav = document.querySelector('nav');
+    const body = document.querySelector('body'); //for our giant event listener
     let newInputs = document.querySelector('#new-form');
     let projectSelection = document.querySelector('#projectSelection');
-    let projectSelectionHTML = projectSelection.innerHTML;
-    const taskListUL = document.querySelector("ul.task-list");
-    const allSelection = document.querySelector('#allNav');
+    let projectSelectionHTML = projectSelection.innerHTML; //grabs the initial pages projectselection div that holds our project selection elements in our hidden add project/task form
     let options = []; //for select dropdown menu for project folders
 
     function toggleSelection(query) {
-        if (!newInputs.contains(query)) {
-            let div = document.createElement('div');
-            div.innerHTML = projectSelectionHTML;
-            div.classList.add('input-item');
+        if (!newInputs.contains(query)) { //if the new task form area doesn't have the query (select html element), that means it was deleted... so we'll make a new one
+            let div = document.createElement('div'); //make a div to hold our select element
+            div.innerHTML = projectSelectionHTML; //sets it's inner html to equal the onload content of that div when it existed.
+            div.classList.add('input-item'); //adding the necessary classes
             div.classList.add('flex');
-            div.id = 'projectSelection';
-            newInputs.append(div);
-        }
+            div.id = 'projectSelection'; //adding necessary id
+            newInputs.append(div); //appending it inside our newInputs div (the add project/task form)
+        } //if it does have it, then we don't need to make it
     }
 
-    function updateNav(proj) {
-        const navUl = document.querySelector('#navList');
-        const completed = navUl.querySelector('#completed');
-        let selectOptions = document.querySelector(`select[name="project"]`);
-        let option = document.createElement('option');
-        option.value = proj.title;
+    function updateNav(proj) { //adding new nav list items to the dom (nav area) when a new project is made
+        const navUl = document.querySelector('#navList'); //getting the navUL dom area
+        const completed = navUl.querySelector('#completed'); //where we will insert our new title before
+        let selectOptions = document.querySelector(`select[name="project"]`); //grabbing the selection options to add to it
+        let option = document.createElement('option'); //creating new option to add to project selection element
+        option.value = proj.title; 
         option.text = proj.title;
-        options.push(option);
+        options.push(option); //options array created in global scope now has new option from newly created project folder
         let li = document.createElement('li');
         li.innerHTML = `
             <div class="navicon-container">
@@ -71,129 +57,60 @@ import {
             </div>
             <h3><a class="projectNav" data-title="${proj.title}">${proj.title}</a></h3>
         `;
-        navUl.insertBefore(li, completed);
-        options.forEach(option => selectOptions.add(option));
-        setStorage('nav', navUl);
-        setStorage('options', Object.from);
+        navUl.insertBefore(li, completed); //inserting that newly created li heading at the end of our project section in the nav
+        options.forEach(option => selectOptions.add(option)); //add every option in our options array to the selectOptions element in the dom
+        setNavValues(document.querySelectorAll(`[data-title="${proj.title}"]`));
     }
 
-    function appendLI(obj) {
-        const {title, priority, status, project} = obj;
-        let titleNoSpaces = deleteSpacesInStrings(title);
-        let li = document.createElement('li');
-        li.classList.add('task-item', 'flex');
-        li.innerHTML = `
-            <div class="taskicon-container task" data-project="${project}" data-title="${titleNoSpaces}" data-status="${status}">
-            <svg
-            xmlns="http://www.w3.org/2000/svg"
-            class="icon icon-tabler icon-tabler-circle"
-            viewBox="0 0 24 24"
-            stroke-width="1.5"
-            stroke="#000000"
-            fill="none"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <circle cx="12" cy="12" r="9" />
-            </svg>
-        </div>
-        <div class="task">
-            <p id="taskName">${title}</p>
-        </div>
-        <div class="priority-container task">
-            <p>Priority: <span data-priority="${priority}" class="priority">${priority}</span></p>
-        </div>
-        <div class="task edit-container flex">
-            <div class="taskicon-container delete">
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    class="icon icon-tabler icon-tabler-x"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="#000000"
-                    fill="none"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                >
-                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-            </div>
-        </div>  
-        `;
-        taskListUL.appendChild(li);
-    }
-
-    function printProjectTasks(arr, title) {
-        let project = getProject(arr, title)
-        let projectTasks = project.tasks;
-        printTasks(projectTasks);
-    }
-
-    function printTasks(arr) {
-        taskListUL.innerHTML = '';
-        arr.forEach(task => appendLI(task));
-    }
-
-    function deleteTaskFromDom(query, delay) {
-        query = deleteSpacesInStrings(query);
-        let selectedTask = document.querySelector(`[data-title=${query}]`);
-        let li = selectedTask.parentNode;
-        setTimeout(() => li.remove(), delay);
-    }
-
-    function newNavSelection(target) {
-        let selection = document.querySelector('.selected');
-        if (selection) {
-            selection.classList.remove('selected');
-        }
-        target.classList.add('selected');
-    }
-
-    function getHeading() {
-        let h2 = document.getElementById('folder-title').querySelector('h2');
-        return h2;
-    }
-
-    function setHeading(target) {
-        let newHeading = target.text;
-        let h2 = getHeading();
-        h2.setAttribute('data-heading', `${newHeading.toLowerCase()}`);
-        h2.innerHTML = newHeading;
-        const dataName = h2.getAttribute('data-heading');
-        taskListUL.innerHTML = '';
-        return dataName;
-    }
-
-    function goToAll() {
-        newNavSelection(allSelection);
-        setHeading(allSelection);
-        printTasks(all);
-        toggleHiddenControls();
-    }
-
-    function toggleHiddenControls() {
-        let deleteProjectButton = document.querySelector('#deleteProjectButton');
-        let selectedNav = document.querySelector('.selected');
-        if (selectedNav === allSelection || selectedNav.id === "completedAll") {
-            deleteProjectButton.classList.add('hidden');
+    function getStorage(obj) {
+        if (!localStorage[obj]) {
+            return;
         } else {
-            deleteProjectButton.classList.remove('hidden'); 
+            if (obj === 'projects') {
+                let desiredStorage = localStorage.getItem(obj);
+                desiredStorage = JSON.parse(desiredStorage);
+                for(let [key, value] of Object.entries(desiredStorage)) {
+                    projects[key] = value;
+                }
+            } else if (obj === 'all') {
+                let desiredStorage = localStorage.getItem(obj);
+                desiredStorage = JSON.parse(desiredStorage);
+                for(let [key, value] of Object.entries(desiredStorage)) {
+                    all.push(value);
+                }
+            } else if (obj === 'completed') {
+                let desiredStorage = localStorage.getItem(obj);
+                desiredStorage = JSON.parse(desiredStorage);
+                for(let [key, value] of Object.entries(desiredStorage)) {
+                    value.status = true;
+                    completed.push(value);
+                }
+            } else if (obj === 'navList') {
+                let desiredStorage = localStorage.getItem(obj);
+                desiredStorage = JSON.parse(desiredStorage);
+                for(let [key, value] of Object.entries(desiredStorage)) {
+                    if (projects[value]) {
+                        let valueObj = getProject(value);
+                        updateNav(valueObj);
+                    }
+                } 
+            }
         }
     }
 
-    let ro = new ResizeObserver( entries => {
-      for (let entry of entries) {
-        const cr = entry.contentRect;
-        (cr.width >= 1300) ? nav.classList.remove('hidden') : nav.classList.add('hidden');
-      }
-    });
+    function getAllStorage() {
+        //retrieving any localStorage
+        getStorage('projects'); 
+        getStorage('all');
+        getStorage('completed');
+        getStorage('navList');
+        goToAll();
+    }
     
     //event listener function
 const activateListeners = function() {
     animate(); //zdog call
+
     // Observe one or multiple elements
     ro.observe(document.querySelector('html'));
 
@@ -202,123 +119,153 @@ const activateListeners = function() {
         let prioritySelectionDiv = document.querySelector('#priority-select').parentElement;
         let target = e.target;
         switch (true) {
-            case (target.id === 'hamburger-container'): 
-                nav.classList.toggle('hidden');
+            case (target.id === 'hamburger-container'): //user clicks on hamburger icon (this only occurs on smaller screen devices)
+                toggleNav();
                 break;
-            case (target.id === 'addFolderButton' || target.id === 'addProject'):
-                addFormContainer.classList.remove('hidden');
-                projectSelection = document.querySelector('#projectSelection');
-                newInputs.removeChild(projectSelection);
-                prioritySelectionDiv.classList.replace('flex', 'hidden');
+            case (target.id === 'addFolderButton' || target.id === 'addProject'): { //user is creating a new project folder
+                    addFormContainer.classList.remove('hidden'); //unhide our add form
+                    projectSelection = document.querySelector('#projectSelection'); //grab our html select element in the add form
+                    newInputs.removeChild(projectSelection); //remove the select element from the form because if it was just hidden then whatever the previous selected value was will be transffered to our object that we're creating
+                    prioritySelectionDiv.classList.replace('flex', 'hidden'); //hide the priority selection element
+                }
                 break;
-            case (target.id === 'addTaskButton'): 
-                prioritySelectionDiv.classList.replace('hidden', 'flex');
-                addFormContainer.classList.remove('hidden');
-                projectSelection = document.querySelector('#projectSelection');
-                toggleSelection(projectSelection);
+            case (target.id === 'addTaskButton'): { //user is creating a new task
+                    prioritySelectionDiv.classList.replace('hidden', 'flex'); //make sure priority is visible
+                    addFormContainer.classList.remove('hidden'); //make sure the form is visible
+                    projectSelection = document.querySelector('#projectSelection');
+                    toggleSelection(projectSelection); //create a new project folder selection element in the form if it doesn't exist (see toggleselection helper function)
+                }
                 break;
-            case (target.id === 'cancel'):
-                addFormContainer.classList.add('hidden');
-                newInputs.reset();
-                projectSelection = document.querySelector('#projectSelection');
-                toggleSelection(projectSelection);
+            case (target.id === 'cancel'): {
+                    addFormContainer.classList.add('hidden'); //hide the form
+                    newInputs.reset(); //reset the form
+                    projectSelection = document.querySelector('#projectSelection');
+                    toggleSelection(projectSelection); //create a new project folder selection element in the form if it doesn't exist (see toggleselection helper function)
+                }
                 break;
-            case (target.id === 'submit'): //making either project folder or individual task
-                let inputsForm = new FormData(newInputs);
-                let obj = Object.fromEntries(inputsForm);
-                toggleSelection(projectSelection);
-                if (obj.project) { //if there is a project variable, we know we are creating a task
-                    let newTask = CreateTask(obj);
-                    let { project } = newTask;
-                    let index = projects.findIndex(task => task.title === project);
-                    projects[index].tasks.push(newTask); //task is now in the propper project object in the projects array
-                    all.push(newTask); //task gets put in our all section
-                    let currentFolder = document.getElementById('folder-title').querySelector('h2').getAttribute('data-heading');
-                    if (currentFolder.toLowerCase() === project.toLowerCase()) {
-                        taskListUL.innerHTML = '';
-                        projects[index].tasks.forEach(task => appendLI(task));
+            case (target.id === 'submit'): //making either project folder or individual task 
+                {
+                    let inputsForm = new FormData(newInputs); //grabs the users form input
+                    let obj = Object.fromEntries(inputsForm); //turn the data into an object
+                    toggleSelection(projectSelection);
+                    if (obj.project) { //if there is a project variable, we know we are creating a task
+                        let newTask = CreateTask(obj); //variable to hold our returns task object from our factory function
+                        let { project } = newTask; //get the project property from our task object
+                        projects[project].tasks.push(newTask); //adding new task object to the tasks array property of our nested project object in our global projects object. if prop exists great, if not it is created
+                        all.push(newTask); //task object gets put as it's own property in the global all object
+                        setProjectTask(project, newTask); //local storage
+                        setAll(newTask); //local storage
+                        let currentFolder = document.getElementById('folder-title').querySelector('h2').getAttribute('data-heading'); //get the dataheading of our folder title
+                        if (currentFolder.toLowerCase() === project.toLowerCase()) { //if the current folder user has open is equal to the newly created task objects property title
+                            taskListUL.innerHTML = ''; //wipe everytime to avoid duplicating tasks
+                            projects[project].tasks.forEach(task => appendLI(task)); //append all tasks in that project folder to the dom
+                        }
+                    } else if (!obj.project) { //if no project variable, we know we are creating a project folder object
+                        let newProject = CreateProject(obj); //variable to hold our returned project object from our factory function
+                        if (!projects[newProject.title]) { //checking for duplicates
+                            projects[newProject.title] = newProject; //adding title of new project as a property in our global projects object and setting it equal to the project object value
+                            updateNav(newProject); //adding new nav list items to the dom (nav area)
+                            setProjectsList(projects); //setting local storage
+                        }
                     }
-                } else if (!obj.project) { //if no project variable, we know we are creating a project folder object
-                    let newProject = CreateProject(obj);
-                    projects.push(newProject);
-                    updateNav(newProject);
+                    addFormContainer.classList.add('hidden'); //after our objects are created and updated we will hide the form
+                    newInputs.reset(); //reset the form 
                 }
-                addFormContainer.classList.add('hidden');
-                newInputs.reset();
                 break;
-            case (target.classList.contains('projectNav')): //appending project tasks to the dom
-                newNavSelection(target);
-                toggleHiddenControls();
-                const dataName = setHeading(target);
-                let optionName = document.querySelector(`option[selected="selected"]`);
-                if (optionName) {
-                    optionName.removeAttribute('selected');
+            case (target.classList.contains('projectNav')): //user clicked on nav li so we will append selected project's tasks to the dom
+                {
+                    newNavSelection(target); //make whichever li our selected nav li (see helper function newNavSelection)
+                    toggleHiddenControls(); //show the delete project button (please see toggleHiddenControls helper function)
+                    const dataName = setHeading(target); //make the project folder title match the nav li and return the string of it to a variable
+                    let optionName = document.querySelector(`option[selected="selected"]`); //grab the currently selected option in our project selection in the add form
+                    if (optionName) { //if there is a currently selected option in the select element
+                        optionName.removeAttribute('selected'); //remove the selected attribute of it
+                    }
+                    document.querySelector(`option[value="${target.text.toLowerCase()}"]`).setAttribute('selected', 'selected'); //set the selected project folder to the selected option 
+                    printProjectTasks(dataName); //print tasks of the selected project to the page
                 }
-                document.querySelector(`option[value="${target.text.toLowerCase()}"]`).setAttribute('selected', 'selected');
-                printProjectTasks(projects, dataName);
                 break;
             case (target.classList.contains('delete')): //deleting task from dom
-                let checkingFolderTitle = getHeading().innerText.toLowerCase();
-                let li = target.parentNode.parentNode;
-                let sibling = li.firstElementChild;
-                let task = sibling.dataset.title;
-                let projectTitle = sibling.dataset.project;
-                removeTask(projects, projectTitle, task);
-                removeTask(all, projectTitle, task);
-                if (checkingFolderTitle === 'total') {
-                    removeTask(completed, projectTitle, task);
+                {
+                    let checkingFolderTitle = getHeading().innerText.toLowerCase();
+                    let li = target.parentNode.parentNode;
+                    let sibling = li.firstElementChild;
+                    let task = sibling.dataset.title;
+                    let projectTitle = sibling.dataset.project;
+                    if (checkingFolderTitle === 'total') {
+                        removeTask(completed, projectTitle, task);
+                        setDeletionOfCompletedTask(task);
+                        deleteTaskFromDom(task, 0);
+                    } else {
+                        removeTask(projects, projectTitle, task);
+                        removeTask(all, projectTitle, task);
+                        deleteTaskFromDom(task, 0);
+                        setDeletionOfTask(projectTitle, task); //local storage
+                    }
                 }
-                deleteTaskFromDom(task, 0);
                 break;
             case (target.classList.contains('task') && target.dataset.status === 'false'): //marking tasks complete
-                let taskTitle = target.parentElement.querySelector('#taskName').innerText;
-                let projectFolder = target.dataset.project;
-                let taskObj = getTask(projects, projectFolder, taskTitle);
-                taskObj.complete(projects, projectFolder, taskTitle);
-                target.dataset.status = 'true';
-                removeTask(all, taskObj, taskTitle);
-                deleteTaskFromDom(taskTitle, 1000);
+                {
+                    let taskTitle = target.parentElement.querySelector('#taskName').innerText;
+                    let projectFolder = target.dataset.project;
+                    let taskObj = getTask(projectFolder, taskTitle);
+                    if (!taskObj.complete) {
+                        taskObj.status = true;
+                        taskObj.complete = completeTask;
+                    } 
+                    target.dataset.status = true;
+                    taskObj.complete(projects, projectFolder, taskTitle);
+                    removeTask(all, taskObj, taskTitle);
+                    deleteTaskFromDom(taskTitle, 1000);
+                }
                 break;
             case (target.id === 'allNav'):
                 goToAll();
                 break;
             case (target.id === 'completedAll'):
-                newNavSelection(target);
-                toggleHiddenControls();
-                setHeading(target);
-                let flattenedArr = completed.flat(1);
-                printTasks(flattenedArr);
+                {
+                    newNavSelection(target); //make the completed all nav li our selected nav li (see helper function newNavSelection)
+                    toggleHiddenControls(); //hide the delete project button (please see toggleHiddenControls helper function)
+                    setHeading(target); //make the project folder title match the completed nav li
+                    let flattenedArr = completed.flat(1);
+                    printTasks(flattenedArr);
+                }
                 break;
             case (target.id === 'deleteProjectButton'):
-                let h2 = document.getElementById('folder-title').querySelector('h2');
-                const projectName = h2.getAttribute('data-heading');
-                let selectOptions = document.querySelector(`select[name="project"]`);
-                for (let i = 0; i < selectOptions.length; i++) {
-                    if (selectOptions.options[i].value === projectName) {
-                        selectOptions.remove(i);
+                {
+                    let h2 = document.getElementById('folder-title').querySelector('h2');
+                    const projectName = h2.getAttribute('data-heading');
+                    let selectOptions = document.querySelector(`select[name="project"]`);
+                    for (let i = 0; i < selectOptions.length; i++) {
+                        if (selectOptions.options[i].value === projectName) {
+                            selectOptions.remove(i);
+                        }
                     }
+                    let navListItem = document.querySelector(`nav [data-title="${projectName}"]`).parentNode.parentNode;
+                    navListItem.remove();
+                    goToAll();
+                    removeProject(projects, projectName);      
+                    setRemovalOfNavValue(projectName); 
                 }
-                let navListItem = document.querySelector(`nav [data-title="${projectName}"]`).parentNode.parentNode;
-                navListItem.remove();
-                goToAll();
-                removeProject(projects, projectName);
                 break;
             case (target.id === 'sortByButton'):
-                let sortByContainer = document.querySelector('#sortBySelect');
-                let sortByChoice = sortByContainer.options[sortByContainer.selectedIndex].value;
-                if (!sortByChoice) {
-                    break;
-                } else {
-                    let currentHeading = getHeading().dataset.heading;
-                    if (currentHeading === 'all') {
-                        let sortedArray = sortTasks(all, currentHeading, sortByChoice);
-                        printTasks(sortedArray);             
-                    } else if (currentHeading === 'total') {
-                        let sortedArray = sortTasks(completed, currentHeading, sortByChoice);
-                        printTasks(sortedArray);    
+                {
+                    let sortByContainer = document.querySelector('#sortBySelect');
+                    let sortByChoice = sortByContainer.options[sortByContainer.selectedIndex].value;
+                    if (!sortByChoice) {
+                        break;
                     } else {
-                        let sortedArray = sortTasks(projects, currentHeading, sortByChoice);
-                        printTasks(sortedArray);
+                        let currentHeading = getHeading().dataset.heading;
+                        if (currentHeading === 'all') {
+                            let sortedArray = sortTasks(all, currentHeading, sortByChoice);
+                            printTasks(sortedArray);             
+                        } else if (currentHeading === 'total') {
+                            let sortedArray = sortTasks(completed, currentHeading, sortByChoice);
+                            printTasks(sortedArray);    
+                        } else {
+                            let sortedArray = sortTasks(projects, currentHeading, sortByChoice);
+                            printTasks(sortedArray);
+                        }
                     }
                 }
                 break;
@@ -327,4 +274,4 @@ const activateListeners = function() {
 
   };
   
-  export { activateListeners };
+  export { activateListeners , getAllStorage};
