@@ -1,4 +1,4 @@
-import { all, getProject, deleteSpacesInStrings } from './tasks';
+import { all, getProject } from './tasks';
 
 const nav = document.querySelector('nav');
 const allSelection = document.querySelector('#allNav');
@@ -10,6 +10,14 @@ let ro = new ResizeObserver( entries => {
       (cr.width >= 1300) ? nav.classList.remove('hidden') : nav.classList.add('hidden');
     }
   });
+
+  function deleteSpacesInStrings(str) {
+    if (/\s/.test(str)) {
+        // It has any kind of whitespace
+        str = str.replace(/ +/g, "");
+    }
+    return str;
+}
 
 function toggleNav() {
     nav.classList.toggle('hidden'); //hide or show our nav area
@@ -95,7 +103,7 @@ function appendLI(obj) {
         </svg>
     </div>
     <div class="task">
-        <p id="taskName">${title}</p>
+        <p class="taskTitle" id="${titleNoSpaces}">${title}</p>
     </div>
     <div class="priority-container task">
         <p>Priority: <span data-priority="${priority}" class="priority">${priority}</span></p>
@@ -122,4 +130,4 @@ function appendLI(obj) {
     taskListUL.appendChild(li); //append the newly made task list item to the tasks list on the page
 }
 
-export { ro, taskListUL, toggleNav, toggleHiddenControls, printProjectTasks, printTasks, deleteTaskFromDom, newNavSelection, getHeading, setHeading, goToAll, appendLI, };
+export { ro, taskListUL, toggleNav, toggleHiddenControls, printProjectTasks, printTasks, deleteTaskFromDom, newNavSelection, getHeading, setHeading, goToAll, appendLI, deleteSpacesInStrings};

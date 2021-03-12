@@ -1,3 +1,4 @@
+import {deleteSpacesInStrings} from './helpers';
 
       let projects = {}; 
       let completed = []; 
@@ -33,30 +34,25 @@
         };
       }
 
-      //helper functions
-    function deleteSpacesInStrings(str) {
-        if (/\s/.test(str)) {
-            // It has any kind of whitespace
-            str = str.replace(/ +/g, "");
-        }
-        return str;
-    }
+
 
     function getTaskIndex(proj, task) {
         let project = getProject(proj);
-        let taskIndex = project.tasks.findIndex(obj => obj.title === task);
+        let taskIndex = project.tasks.findIndex(obj => deleteSpacesInStrings(obj.title) === task);
         return taskIndex;
     }
 
     function getProject(name) {
-      let project = projects[name];
+      let nameNoSpaces = deleteSpacesInStrings(name);
+      let project = projects[nameNoSpaces];
       return project;
   }
 
   function getTask(proj, task) {
       let project = getProject(proj)
       if (!project) {
-        //maybe?
+        console.log('no project?');
+        return;
       } else {
         let taskIndex = getTaskIndex(proj, task);
         let todo = project.tasks[taskIndex];
@@ -67,7 +63,7 @@
       function removeTask(obj, proj, task) {
         if (obj === all || obj === completed) { //objects are our global arrays of task objects
           let taskNoSpaces = deleteSpacesInStrings(task);
-          let taskIndex = obj.findIndex(todo => todo.title === taskNoSpaces); //objects are actually arrays which is why array methods are working here
+          let taskIndex = obj.findIndex(todo => deleteSpacesInStrings(todo.title) === taskNoSpaces); //objects are actually arrays which is why array methods are working here
           let removed = obj.splice(taskIndex, 1);
           return removed;
         } else { //obj is equal to our global projects object

@@ -1,6 +1,6 @@
 import { animate } from './zdog';
 import {setStorage, setNavValues, setSelectOptionValues, setRemovalOfNavValue, setRemovalOfOptionValues} from './storage';
-import {ro, taskListUL, toggleNav, toggleHiddenControls, printProjectTasks, printTasks, deleteTaskFromDom, newNavSelection, getHeading, setHeading, goToAll, appendLI} from './helpers';
+import {ro, taskListUL, toggleNav, toggleHiddenControls, printProjectTasks, printTasks, deleteTaskFromDom, newNavSelection, getHeading, setHeading, goToAll, appendLI, deleteSpacesInStrings} from './helpers';
 import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask, removeProject, sortTasks, projects, completed, all} from './tasks';
 
   /* DOM manipulation scripts */
@@ -192,19 +192,30 @@ const activateListeners = function() {
                     let inputsForm = new FormData(form); //grabs the users form input
                     let obj = Object.fromEntries(inputsForm); //turn the data into an object
                     if (formContainer.firstChild.id === 'newTaskForm') { 
-                        let newTask = CreateTask(obj); //variable to hold our returns task object from our factory function
-                        let { project } = newTask; //get the project property from our task object
-                        projects[project].tasks.push(newTask); //adding new task object to the tasks array property of our nested project object in our global projects object. if prop exists great, if not it is created
-                        all.push(newTask); //task object gets put as it's own property in the global all object
-                        let currentFolder = document.getElementById('folder-title').querySelector('h2').getAttribute('data-heading'); //get the dataheading of our folder title
-                        if (currentFolder.toLowerCase() === project.toLowerCase()) { //if the current folder user has open is equal to the newly created task objects property title
-                            taskListUL.innerHTML = ''; //wipe everytime to avoid duplicating tasks
-                            projects[project].tasks.forEach(task => appendLI(task)); //append all tasks in that project folder to the dom
+                        if (obj.title === '') {
+                            alert('please name your to-do');
+                            return;
+                        } else if (obj.project === null || obj.project === undefined) {
+                            alert('please seelct or create a project location');
+                            return;
+                        } else {
+                            let newTask = CreateTask(obj); //variable to hold our returns task object from our factory function
+                            let { project } = newTask; //get the project property from our task object
+                            projects[project].tasks.push(newTask); //adding new task object to the tasks array property of our nested project object in our global projects object. if prop exists great, if not it is created
+                            all.push(newTask); //task object gets put as it's own property in the global all object
+                            let currentFolder = document.getElementById('folder-title').querySelector('h2').getAttribute('data-heading'); //get the dataheading of our folder title
+                            if (currentFolder.toLowerCase() === project.toLowerCase()) { //if the current folder user has open is equal to the newly created task objects property title
+                                taskListUL.innerHTML = ''; //wipe everytime to avoid duplicating tasks
+                                projects[project].tasks.forEach(task => appendLI(task)); //append all tasks in that project folder to the dom
+                            }
                         }
                     } else if (formContainer.firstChild.id === 'newProjectForm') { //we are creating a project folder object
                         let newProject = CreateProject(obj); //variable to hold our returned project object from our factory function
                         if (projects[newProject.title]) { //checking for duplicates
                             alert('sorry no duplicate folder names');
+                            return;
+                        } else if(newProject.title === '') {
+                            alert('please name project folder');
                             return;
                         } else {
                             projects[newProject.title] = newProject; //adding title of new project as a property in our global projects object and setting it equal to the project object value
@@ -251,7 +262,8 @@ const activateListeners = function() {
                 break;
             case (target.classList.contains('task') && target.dataset.status === 'false'): //marking tasks complete
                 {
-                    let taskTitle = target.parentElement.querySelector('#taskName').innerText;
+                    let taskTitle = target.parentElement.querySelector('.taskTitle').innerText;
+                    taskTitle = deleteSpacesInStrings(taskTitle);
                     let projectFolder = target.dataset.project;
                     let taskObj = getTask(projectFolder, taskTitle);
                     if (!taskObj.complete) {
