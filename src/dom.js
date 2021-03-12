@@ -1,5 +1,5 @@
 import { animate } from './zdog';
-import {setNavValues, setProjectsList, setProjectTask, setAll, setDeletionOfTask, setDeletionOfCompletedTask, setRemovalOfNavValue} from './storage';
+import {setNavValues, setSelectOptionValues, setProjectsList, setProjectTask, setAll, setDeletionOfTask, setDeletionOfCompletedTask, setRemovalOfNavValue, setRemovalOfOptionValues} from './storage';
 import {ro, taskListUL, toggleNav, toggleHiddenControls, printProjectTasks, printTasks, deleteTaskFromDom, newNavSelection, getHeading, setHeading, goToAll, appendLI} from './helpers';
 import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask, removeProject, sortTasks, projects, completed, all} from './tasks';
 
@@ -7,26 +7,61 @@ import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask
 
   //global variables
     const body = document.querySelector('body'); //for our giant event listener
-    let newInputs = document.querySelector('#new-form');
-    let projectSelection = document.querySelector('#projectSelection');
-    let projectSelectionHTML = projectSelection.innerHTML; //grabs the initial pages projectselection div that holds our project selection elements in our hidden add project/task form
+    const formContainer = document.getElementById('addFormContainer');
     let options = []; //for select dropdown menu for project folders
 
-    function toggleSelection(query) {
-        if (!newInputs.contains(query)) { //if the new task form area doesn't have the query (select html element), that means it was deleted... so we'll make a new one
-            let div = document.createElement('div'); //make a div to hold our select element
-            div.innerHTML = projectSelectionHTML; //sets it's inner html to equal the onload content of that div when it existed.
-            div.classList.add('input-item'); //adding the necessary classes
-            div.classList.add('flex');
-            div.id = 'projectSelection'; //adding necessary id
-            newInputs.append(div); //appending it inside our newInputs div (the add project/task form)
-        } //if it does have it, then we don't need to make it
+    function makeForm() {
+        let form = document.createElement('form');
+        form.classList.add('flex', 'input-container');
+        return form;
+    }
+
+    function deleteForm() {
+        formContainer.firstChild.remove();
+    }
+
+    function makeProjectForm() {
+        deleteForm();
+        let form = makeForm();
+        form.setAttribute('id', 'newProjectForm');
+        form.innerHTML = `
+            <div class="input-item flex" data-task="title">
+                <label class="info" for="title">Title:</label>
+                <input type="text" class="info" id="title" data-new="title" name="title">
+            </div>
+        `;
+        formContainer.prepend(form);
+    }
+
+    function makeTaskForm() {
+        deleteForm();
+        let form = makeForm();
+        form.setAttribute('id', 'newTaskForm');
+        form.innerHTML = `
+            <div class="input-item flex" data-task="title">
+                <label class="info" for="title">Title:</label>
+                <input type="text" class="info" id="title" data-new="title" name="title">
+            </div>
+            <div class="input-item flex">
+                <label class="info" for="priority-select">Priority:</label>
+                <select class="info" name="priority" id="priority-select" data-new="priority">
+                    <option value="">Please select task priority</option>
+                    <option value="high">High</option>
+                    <option value="med" selected>Med</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="input-item flex" id="projectSelection">
+                <label class="info" for="projectSelect">Project:</label>
+                <select class="info" name="project" id="projectSelect"></select>
+            </div>
+        `;
+        formContainer.prepend(form);
     }
 
     function updateNav(proj) { //adding new nav list items to the dom (nav area) when a new project is made
         const navUl = document.querySelector('#navList'); //getting the navUL dom area
         const completed = navUl.querySelector('#completed'); //where we will insert our new title before
-        let selectOptions = document.querySelector(`select[name="project"]`); //grabbing the selection options to add to it
         let option = document.createElement('option'); //creating new option to add to project selection element
         option.value = proj.title; 
         option.text = proj.title;
@@ -58,8 +93,13 @@ import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask
             <h3><a class="projectNav" data-title="${proj.title}">${proj.title}</a></h3>
         `;
         navUl.insertBefore(li, completed); //inserting that newly created li heading at the end of our project section in the nav
-        options.forEach(option => selectOptions.add(option)); //add every option in our options array to the selectOptions element in the dom
         setNavValues(document.querySelectorAll(`[data-title="${proj.title}"]`));
+    }
+
+    function updateSelectOptions(arr) {
+        let selectOptions = document.querySelector(`select[name="project"]`); //grabbing the selection options to add to it
+        arr.forEach(option => selectOptions.add(option)); //add every option in our options array to the selectOptions element in the dom
+        setSelectOptionValues(arr);
     }
 
     function getStorage(obj) {
@@ -106,6 +146,7 @@ import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask
         getStorage('navList');
         goToAll();
     }
+
     
     //event listener function
 const activateListeners = function() {
@@ -115,40 +156,35 @@ const activateListeners = function() {
     ro.observe(document.querySelector('html'));
 
     body.addEventListener('click', (e) => {
-        const addFormContainer = document.querySelector('#addFormContainer');
-        let prioritySelectionDiv = document.querySelector('#priority-select').parentElement;
         let target = e.target;
         switch (true) {
             case (target.id === 'hamburger-container'): //user clicks on hamburger icon (this only occurs on smaller screen devices)
                 toggleNav();
                 break;
             case (target.id === 'addFolderButton' || target.id === 'addProject'): { //user is creating a new project folder
-                    addFormContainer.classList.remove('hidden'); //unhide our add form
-                    projectSelection = document.querySelector('#projectSelection'); //grab our html select element in the add form
-                    newInputs.removeChild(projectSelection); //remove the select element from the form because if it was just hidden then whatever the previous selected value was will be transffered to our object that we're creating
-                    prioritySelectionDiv.classList.replace('flex', 'hidden'); //hide the priority selection element
+                    makeProjectForm();
+                    formContainer.classList.remove('hidden'); //unhide our add form
                 }
                 break;
             case (target.id === 'addTaskButton'): { //user is creating a new task
-                    prioritySelectionDiv.classList.replace('hidden', 'flex'); //make sure priority is visible
-                    addFormContainer.classList.remove('hidden'); //make sure the form is visible
-                    projectSelection = document.querySelector('#projectSelection');
-                    toggleSelection(projectSelection); //create a new project folder selection element in the form if it doesn't exist (see toggleselection helper function)
+                    makeTaskForm();
+                    if (options.length >= 1) {
+                        updateSelectOptions(options); 
+                    }
+                    formContainer.classList.remove('hidden'); //make sure the form is visible
                 }
                 break;
             case (target.id === 'cancel'): {
-                    addFormContainer.classList.add('hidden'); //hide the form
-                    newInputs.reset(); //reset the form
-                    projectSelection = document.querySelector('#projectSelection');
-                    toggleSelection(projectSelection); //create a new project folder selection element in the form if it doesn't exist (see toggleselection helper function)
+                    formContainer.classList.add('hidden'); //hide the form
+                    document.querySelector('form').reset(); //reset the form
                 }
                 break;
             case (target.id === 'submit'): //making either project folder or individual task 
                 {
-                    let inputsForm = new FormData(newInputs); //grabs the users form input
+                    let form = document.querySelector('form');
+                    let inputsForm = new FormData(form); //grabs the users form input
                     let obj = Object.fromEntries(inputsForm); //turn the data into an object
-                    toggleSelection(projectSelection);
-                    if (obj.project) { //if there is a project variable, we know we are creating a task
+                    if (formContainer.firstChild.id === 'newTaskForm') { 
                         let newTask = CreateTask(obj); //variable to hold our returns task object from our factory function
                         let { project } = newTask; //get the project property from our task object
                         projects[project].tasks.push(newTask); //adding new task object to the tasks array property of our nested project object in our global projects object. if prop exists great, if not it is created
@@ -160,20 +196,27 @@ const activateListeners = function() {
                             taskListUL.innerHTML = ''; //wipe everytime to avoid duplicating tasks
                             projects[project].tasks.forEach(task => appendLI(task)); //append all tasks in that project folder to the dom
                         }
-                    } else if (!obj.project) { //if no project variable, we know we are creating a project folder object
+                    } else if (formContainer.firstChild.id === 'newProjectForm') { //if no project variable, we know we are creating a project folder object
                         let newProject = CreateProject(obj); //variable to hold our returned project object from our factory function
-                        if (!projects[newProject.title]) { //checking for duplicates
+                        if (projects[newProject.title]) { //checking for duplicates
+                            alert('sorry no duplicate folder names');
+                            return;
+                        } else {
                             projects[newProject.title] = newProject; //adding title of new project as a property in our global projects object and setting it equal to the project object value
                             updateNav(newProject); //adding new nav list items to the dom (nav area)
                             setProjectsList(projects); //setting local storage
                         }
                     }
-                    addFormContainer.classList.add('hidden'); //after our objects are created and updated we will hide the form
-                    newInputs.reset(); //reset the form 
+                    formContainer.classList.add('hidden'); //after our objects are created and updated we will hide the form
+                    form.reset(); //reset the form 
                 }
                 break;
             case (target.classList.contains('projectNav')): //user clicked on nav li so we will append selected project's tasks to the dom
                 {
+                    makeTaskForm();
+                    if (options.length >= 1) {
+                        updateSelectOptions(options); 
+                    }
                     newNavSelection(target); //make whichever li our selected nav li (see helper function newNavSelection)
                     toggleHiddenControls(); //show the delete project button (please see toggleHiddenControls helper function)
                     const dataName = setHeading(target); //make the project folder title match the nav li and return the string of it to a variable
@@ -181,6 +224,8 @@ const activateListeners = function() {
                     if (optionName) { //if there is a currently selected option in the select element
                         optionName.removeAttribute('selected'); //remove the selected attribute of it
                     }
+                    console.log(target);
+                    console.log(target.text);
                     document.querySelector(`option[value="${target.text.toLowerCase()}"]`).setAttribute('selected', 'selected'); //set the selected project folder to the selected option 
                     printProjectTasks(dataName); //print tasks of the selected project to the page
                 }
@@ -236,6 +281,8 @@ const activateListeners = function() {
                     let h2 = document.getElementById('folder-title').querySelector('h2');
                     const projectName = h2.getAttribute('data-heading');
                     let selectOptions = document.querySelector(`select[name="project"]`);
+                    let optionsIndexToRemove = options.findIndex(option => option === projectName);
+                    options.splice(optionsIndexToRemove, 1);
                     for (let i = 0; i < selectOptions.length; i++) {
                         if (selectOptions.options[i].value === projectName) {
                             selectOptions.remove(i);
@@ -246,6 +293,7 @@ const activateListeners = function() {
                     goToAll();
                     removeProject(projects, projectName);      
                     setRemovalOfNavValue(projectName); 
+                    setRemovalOfOptionValues(projectName);
                 }
                 break;
             case (target.id === 'sortByButton'):

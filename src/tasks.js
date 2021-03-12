@@ -87,7 +87,7 @@
         completedTask.status = true;
         completed.push(completedTask); //push that object into our global completed array
         setCompleted(completedTask);
-        setDeletionOfTask(proj, task);
+        setDeletionOfTask(proj, completedTask);
       }
 
       function sortingLogic(obj, proj, method) {

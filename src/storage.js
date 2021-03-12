@@ -1,7 +1,7 @@
 import {completed} from './tasks';
 
 let navList = [];
-let optionList;
+let optionList = [];
 let projectsList;
 let allList = [];
 let completedList = [];
@@ -13,16 +13,23 @@ function setStorage(name, obj) {
 function setNavValues(nav) {
     const elements = [...nav];
     elements.forEach(el => navList.push(el.textContent));
-    optionList = navList;
     setStorage('navList', navList);
+}
+
+function setSelectOptionValues(arr) {
+    arr.forEach(option => optionList.push(option.textContent));
     setStorage('optionList', optionList);
 }
 
 function setRemovalOfNavValue(name) {
     let navItemIndex = navList.findIndex(li => li === name);
     navList.splice(navItemIndex, 1);
-    optionList = navList;
     setStorage('navList', navList);
+}
+
+function setRemovalOfOptionValues(name) {
+    let optionItemIndex = optionList.findIndex(option => option === name);
+    optionList.splice(optionItemIndex, 1);
     setStorage('optionList', optionList);
 }
 
@@ -96,4 +103,4 @@ function getAllListTask(task) {
     return allTaskIndex;
 }
 
-export {setNavValues, setProjectsList, setProjectTask, setAll, setDeletionOfTask, setCompleted, setDeletionOfProject, setDeletionOfCompletedTask, setRemovalOfNavValue};
+export {setNavValues, setSelectOptionValues, setProjectsList, setProjectTask, setAll, setDeletionOfTask, setCompleted, setDeletionOfProject, setDeletionOfCompletedTask, setRemovalOfNavValue, setRemovalOfOptionValues};
