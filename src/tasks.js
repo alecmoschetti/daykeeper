@@ -1,6 +1,4 @@
 
-      import {setCompleted, setDeletionOfTask, setDeletionOfProject} from './storage'
-
       let projects = {}; 
       let completed = []; 
       let all = [];
@@ -8,7 +6,8 @@
       //project factory function
       function CreateProject(obj) {
         let {title} = obj;
-        let tasks = [];
+        let tasks;
+        (obj.tasks) ? tasks = obj.tasks : tasks = [];
         return {
           title, 
           tasks
@@ -18,7 +17,8 @@
       //task factory function
       function CreateTask(obj) {
         let {title, priority, project} = obj;
-        let status = false;
+        let status;
+        (obj.status) ? tasks = obj.status : status = false;
         let dateCreated = new Date();
         return {          
           title,
@@ -77,17 +77,13 @@
         }
       }
 
-      function removeProject(proj, name) {
+      function removeProject(proj) {
         delete projects[proj];
-        setDeletionOfProject(name);
       }
 
       function completeTask(obj, proj, task) {
         let completedTask = removeTask(obj, proj, task); //return the removed task object into a variable
-        completedTask.status = true;
         completed.push(completedTask); //push that object into our global completed array
-        setCompleted(completedTask);
-        setDeletionOfTask(proj, completedTask);
       }
 
       function sortingLogic(obj, proj, method) {

@@ -1,5 +1,5 @@
 import { animate } from './zdog';
-import {setNavValues, setSelectOptionValues, setProjectsList, setProjectTask, setAll, setDeletionOfTask, setDeletionOfCompletedTask, setRemovalOfNavValue, setRemovalOfOptionValues} from './storage';
+import {setStorage, setNavValues, setSelectOptionValues, setRemovalOfNavValue, setRemovalOfOptionValues} from './storage';
 import {ro, taskListUL, toggleNav, toggleHiddenControls, printProjectTasks, printTasks, deleteTaskFromDom, newNavSelection, getHeading, setHeading, goToAll, appendLI} from './helpers';
 import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask, removeProject, sortTasks, projects, completed, all} from './tasks';
 
@@ -110,19 +110,20 @@ import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask
                 let desiredStorage = localStorage.getItem(obj);
                 desiredStorage = JSON.parse(desiredStorage);
                 for(let [key, value] of Object.entries(desiredStorage)) {
-                    projects[key] = value;
+                    value.tasks.map(task => CreateTask(task));
+                    let existingProject = CreateProject(value);
+                    projects[key] = existingProject;
                 }
             } else if (obj === 'all') {
                 let desiredStorage = localStorage.getItem(obj);
                 desiredStorage = JSON.parse(desiredStorage);
                 for(let [key, value] of Object.entries(desiredStorage)) {
-                    all.push(value);
+                    all.push(CreateTask(value));
                 }
             } else if (obj === 'completed') {
                 let desiredStorage = localStorage.getItem(obj);
                 desiredStorage = JSON.parse(desiredStorage);
                 for(let [key, value] of Object.entries(desiredStorage)) {
-                    value.status = true;
                     completed.push(value);
                 }
             } else if (obj === 'navList') {
@@ -145,6 +146,12 @@ import {CreateProject, CreateTask, completeTask, getTask, getProject, removeTask
         getStorage('completed');
         getStorage('navList');
         goToAll();
+    }
+
+    function setAllStorage() {
+        setStorage('projects', projects);
+        setStorage('all', all);
+        setStorage('completed', completed);
     }
 
     
@@ -189,14 +196,12 @@ const activateListeners = function() {
                         let { project } = newTask; //get the project property from our task object
                         projects[project].tasks.push(newTask); //adding new task object to the tasks array property of our nested project object in our global projects object. if prop exists great, if not it is created
                         all.push(newTask); //task object gets put as it's own property in the global all object
-                        setProjectTask(project, newTask); //local storage
-                        setAll(newTask); //local storage
                         let currentFolder = document.getElementById('folder-title').querySelector('h2').getAttribute('data-heading'); //get the dataheading of our folder title
                         if (currentFolder.toLowerCase() === project.toLowerCase()) { //if the current folder user has open is equal to the newly created task objects property title
                             taskListUL.innerHTML = ''; //wipe everytime to avoid duplicating tasks
                             projects[project].tasks.forEach(task => appendLI(task)); //append all tasks in that project folder to the dom
                         }
-                    } else if (formContainer.firstChild.id === 'newProjectForm') { //if no project variable, we know we are creating a project folder object
+                    } else if (formContainer.firstChild.id === 'newProjectForm') { //we are creating a project folder object
                         let newProject = CreateProject(obj); //variable to hold our returned project object from our factory function
                         if (projects[newProject.title]) { //checking for duplicates
                             alert('sorry no duplicate folder names');
@@ -204,7 +209,6 @@ const activateListeners = function() {
                         } else {
                             projects[newProject.title] = newProject; //adding title of new project as a property in our global projects object and setting it equal to the project object value
                             updateNav(newProject); //adding new nav list items to the dom (nav area)
-                            setProjectsList(projects); //setting local storage
                         }
                     }
                     formContainer.classList.add('hidden'); //after our objects are created and updated we will hide the form
@@ -224,8 +228,6 @@ const activateListeners = function() {
                     if (optionName) { //if there is a currently selected option in the select element
                         optionName.removeAttribute('selected'); //remove the selected attribute of it
                     }
-                    console.log(target);
-                    console.log(target.text);
                     document.querySelector(`option[value="${target.text.toLowerCase()}"]`).setAttribute('selected', 'selected'); //set the selected project folder to the selected option 
                     printProjectTasks(dataName); //print tasks of the selected project to the page
                 }
@@ -239,13 +241,11 @@ const activateListeners = function() {
                     let projectTitle = sibling.dataset.project;
                     if (checkingFolderTitle === 'total') {
                         removeTask(completed, projectTitle, task);
-                        setDeletionOfCompletedTask(task);
                         deleteTaskFromDom(task, 0);
                     } else {
                         removeTask(projects, projectTitle, task);
                         removeTask(all, projectTitle, task);
                         deleteTaskFromDom(task, 0);
-                        setDeletionOfTask(projectTitle, task); //local storage
                     }
                 }
                 break;
@@ -279,7 +279,7 @@ const activateListeners = function() {
             case (target.id === 'deleteProjectButton'):
                 {
                     let h2 = document.getElementById('folder-title').querySelector('h2');
-                    const projectName = h2.getAttribute('data-heading');
+                    const projectName = h2.getAttribute('data-heading'); //make sure to make sure the data-heading has no spaces
                     let selectOptions = document.querySelector(`select[name="project"]`);
                     let optionsIndexToRemove = options.findIndex(option => option === projectName);
                     options.splice(optionsIndexToRemove, 1);
@@ -318,6 +318,7 @@ const activateListeners = function() {
                 }
                 break;
         }
+        setAllStorage();
     });
 
   };
