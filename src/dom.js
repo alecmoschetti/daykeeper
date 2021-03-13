@@ -204,7 +204,7 @@ const activateListeners = function() {
                             projects[project].tasks.push(newTask); //adding new task object to the tasks array property of our nested project object in our global projects object. if prop exists great, if not it is created
                             all.push(newTask); //task object gets put as it's own property in the global all object
                             let currentFolder = document.getElementById('folder-title').querySelector('h2').getAttribute('data-heading'); //get the dataheading of our folder title
-                            if (currentFolder.toLowerCase() === project.toLowerCase()) { //if the current folder user has open is equal to the newly created task objects property title
+                            if (currentFolder === project) { //if the current folder user has open is equal to the newly created task objects property title
                                 taskListUL.innerHTML = ''; //wipe everytime to avoid duplicating tasks
                                 projects[project].tasks.forEach(task => appendLI(task)); //append all tasks in that project folder to the dom
                             }
@@ -216,6 +216,9 @@ const activateListeners = function() {
                             return;
                         } else if(newProject.title === '') {
                             alert('please name project folder');
+                            return;
+                        } else if(/\s/.test(newProject.title)) {
+                            alert('sorry no spaces in project folder titles');
                             return;
                         } else {
                             projects[newProject.title] = newProject; //adding title of new project as a property in our global projects object and setting it equal to the project object value
@@ -239,13 +242,13 @@ const activateListeners = function() {
                     if (optionName) { //if there is a currently selected option in the select element
                         optionName.removeAttribute('selected'); //remove the selected attribute of it
                     }
-                    document.querySelector(`option[value="${target.text.toLowerCase()}"]`).setAttribute('selected', 'selected'); //set the selected project folder to the selected option 
+                    document.querySelector(`option[value="${target.text}"]`).setAttribute('selected', 'selected'); //set the selected project folder to the selected option 
                     printProjectTasks(dataName); //print tasks of the selected project to the page
                 }
                 break;
             case (target.classList.contains('delete')): //deleting task from dom
                 {
-                    let checkingFolderTitle = getHeading().innerText.toLowerCase();
+                    let checkingFolderTitle = getHeading().innerText;
                     let li = target.parentNode.parentNode;
                     let sibling = li.firstElementChild;
                     let task = sibling.dataset.title;

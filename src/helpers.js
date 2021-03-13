@@ -34,7 +34,7 @@ function toggleHiddenControls() { //to hide or show the delete project button de
 }
 
 function printProjectTasks(title) {
-    let project = getProject(title)
+    let project = getProject(title);
     let projectTasks = project.tasks;
     printTasks(projectTasks);
 }
@@ -67,7 +67,7 @@ function getHeading() { //returns the existing folder title dom element
 function setHeading(target) { //makes the project folder title match the targeted nav li item
     let newHeading = target.text; //set a heading variable to be equal to the string value of the text content of our target
     let h2 = getHeading(); //gets the current project folder title heading (please see getHeading helper function)
-    h2.setAttribute('data-heading', `${newHeading.toLowerCase()}`); //set that active heading to new data-heading from our target
+    h2.setAttribute('data-heading', `${newHeading}`); //set that active heading to new data-heading from our target
     h2.innerHTML = newHeading; //set it's innerHTML to equal the textConent of our nav li target
     const dataName = h2.getAttribute('data-heading'); //grab the recently set data-heading attribute value
     taskListUL.innerHTML = ''; //erase all task list items from the task list ul
